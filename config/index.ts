@@ -1,9 +1,2 @@
-import {
-    connection,
-    channelWrapper
-} from "@/config/rabbitmq.config"
-
-export {
-    connection,
-    channelWrapper
-}
+export * from "@/config/rabbitmq.config"
+export * from "./cookie.config"

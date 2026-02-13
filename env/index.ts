@@ -25,6 +25,7 @@ const JWT_ACCESS_EXPIRES =
 const JWT_REFRESH_EXPIRES =
   process.env.JWT_REFRESH_EXPIRES || "7d"
 
+const REDIS_URL=process.env.REDIS_URL
 export {
   DATABASE_URL,
   RABBITMQ_URL,
@@ -34,4 +35,5 @@ export {
   JWT_REFRESH_SECRET,
   JWT_ACCESS_EXPIRES,
   JWT_REFRESH_EXPIRES,
+  REDIS_URL,
 }

@@ -19,8 +19,14 @@ model User {
 }
 
 model Session {
-  id        String   @id @default(uuid())
-  userId    String
-  createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id])
+  id           String   @id @default(uuid())
+  userId       String
+  refreshToken String   // store hashed token
+  userAgent    String?
+  ip           String?
+  isRevoked    Boolean  @default(false)
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+
+  user         User     @relation(fields: [userId], references: [id])
 }

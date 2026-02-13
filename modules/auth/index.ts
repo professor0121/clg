@@ -1,5 +1,2 @@
-import { registerController } from "./auth.controller";
+export * from "./auth.controller";
 
-export {
-    registerController
-}
