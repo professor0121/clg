@@ -1,1 +1,5 @@
-import {prisma}
+import { registerController } from "./auth.controller";
+
+export {
+    registerController
+}
