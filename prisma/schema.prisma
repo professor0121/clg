@@ -6,27 +6,105 @@ datasource db {
   provider = "postgresql"
 }
 
+enum PageStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
 model User {
-  id        String    @id @default(uuid())
-  email     String    @unique
-  password  String
-  role      String    @default("USER")
-  isActive  Boolean   @default(true)
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  username  String
-  sessions  Session[]
+  id           String        @id @default(uuid())
+  email        String        @unique
+  password     String
+  role         String        @default("USER")
+  isActive     Boolean       @default(true)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  username     String
+  sessions     Session[]
+  pages        Page[]        @relation("PageAuthor")
+  pageVersions PageVersion[]
 }
 
 model Session {
   id           String   @id @default(uuid())
   userId       String
-  refreshToken String   // store hashed token
+  refreshToken String // store hashed token
   userAgent    String?
   ip           String?
   isRevoked    Boolean  @default(false)
   expiresAt    DateTime
   createdAt    DateTime @default(now())
 
-  user         User     @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Page {
+  id        String         @id @default(uuid())
+  parentId  String?
+  parent    Page?          @relation("PageHierarchy", fields: [parentId], references: [id])
+  children  Page[]         @relation("PageHierarchy")
+  slug      String
+  fullSlug  String         @unique
+  status    PageStatus     @default(DRAFT)
+  authorId  String
+  author    User           @relation("PageAuthor", fields: [authorId], references: [id])
+  versions  PageVersion[]
+  meta      PageMeta?
+  redirects PageRedirect[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([parentId])
+  @@index([fullSlug])
+}
+
+model PageVersion {
+  id     String @id @default(uuid())
+  pageId String
+
+  title   String
+  content String?
+  layout  Json?
+
+  version     Int
+  isPublished Boolean @default(false)
+
+  createdById String
+  createdBy   User   @relation(fields: [createdById], references: [id])
+
+  createdAt DateTime @default(now())
+
+  page Page @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  @@unique([pageId, version])
+  @@index([pageId])
+}
+
+model PageMeta {
+  pageId String @id
+
+  metaTitle       String?
+  metaDescription String?
+  metaKeywords    String?
+
+  noIndex      Boolean @default(false)
+  noFollow     Boolean @default(false)
+  canonicalUrl String?
+
+  page Page @relation(fields: [pageId], references: [id], onDelete: Cascade)
+}
+
+model PageRedirect {
+  id String @id @default(uuid())
+
+  oldSlug String @unique
+  pageId  String
+
+  page Page @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([oldSlug])
 }
