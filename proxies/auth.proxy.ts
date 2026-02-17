@@ -1,29 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
-import jwt from "jsonwebtoken";
+import { verifyAccessTokenEdge } from "@/lib/edge-jwt";
 
-export interface AuthUser {
-  id: string;
-  email: string;
-  role: string;
-}
-
-export function authMiddleware(req: NextRequest) {
+export async function authProxy(req: NextRequest) {
   const authHeader = req.headers.get("authorization");
+  const cookieToken = req.cookies.get("accessToken")?.value;
 
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+  let token: string | undefined;
+
+  if (authHeader?.startsWith("Bearer ")) {
+    token = authHeader.slice(7);
+  } else if (cookieToken) {
+    token = cookieToken;
+  }
+
+  if (!token) {
     return NextResponse.json(
       { message: "Unauthorized" },
       { status: 401 }
     );
   }
 
-  const token = authHeader.split(" ")[1];
-
   try {
-    const user = jwt.verify(
-      token,
-      process.env.JWT_ACCESS_SECRET!
-    ) as AuthUser;
+    const user = await verifyAccessTokenEdge(token);
 
     const headers = new Headers(req.headers);
     headers.set("x-user", JSON.stringify(user));
@@ -31,7 +29,9 @@ export function authMiddleware(req: NextRequest) {
     return NextResponse.next({
       request: { headers },
     });
-  } catch {
+  } catch (err) {
+    console.error("AUTH PROXY ERROR:", err);
+
     return NextResponse.json(
       { message: "Invalid or expired token" },
       { status: 401 }
