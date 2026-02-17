@@ -56,3 +56,17 @@ export const getPublishedPages = () => {
     orderBy: { createdAt: "desc" },
   });
 };
+
+export const getHomePage = async () => {
+  console.log("PRISMA KEYS:", Object.keys(prisma));
+
+  return prisma.siteSetting.findFirst({
+    include: {
+      homePage: {
+        include: {
+          versions: true,
+        },
+      },
+    },
+  });
+};
