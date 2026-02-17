@@ -29,7 +29,12 @@ export const findParentPageSlug = (id: string) => {
  * Create page (raw Prisma input)
  */
 export const createPage = (data: Prisma.PageCreateInput) => {
-  return prisma.page.create({ data });
+  return prisma.page.create({ data, include: {
+      versions: true,
+      parent: true,
+      author: true,
+    },
+   });
 };
 
 /**

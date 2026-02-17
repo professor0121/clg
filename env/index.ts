@@ -20,7 +20,7 @@ const JWT_ACCESS_SECRET = requiredEnv("JWT_ACCESS_SECRET")
 const JWT_REFRESH_SECRET = requiredEnv("JWT_REFRESH_SECRET")
 
 const JWT_ACCESS_EXPIRES =
-  process.env.JWT_ACCESS_EXPIRES || "15m"
+  process.env.JWT_ACCESS_EXPIRES || "7d"
 
 const JWT_REFRESH_EXPIRES =
   process.env.JWT_REFRESH_EXPIRES || "7d"
