@@ -48,9 +48,9 @@ export const createPageService = async (
  */
 export const getPageBySlug = async (fullSlug: string) => {
   const page = await pageDAO.findPageByFullSlug(fullSlug);
-
+  console.warn(page)
   if (!page || page.status !== "PUBLISHED") {
-    throw new Error("Page not found");
+    return null;
   }
 
   return page;
