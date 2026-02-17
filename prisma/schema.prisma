@@ -52,6 +52,7 @@ model Page {
   versions  PageVersion[]
   meta      PageMeta?
   redirects PageRedirect[]
+  homeFor   SiteSetting?   @relation("HomePage")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -107,4 +108,13 @@ model PageRedirect {
   createdAt DateTime @default(now())
 
   @@index([oldSlug])
+}
+
+model SiteSetting {
+  id String @id @default(uuid())
+
+  homePageId String? @unique
+  homePage   Page?   @relation("HomePage", fields: [homePageId], references: [id])
+
+  updatedAt DateTime @updatedAt
 }

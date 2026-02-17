@@ -55,3 +55,23 @@ export const getPageBySlug = async (fullSlug: string) => {
 
   return page;
 };
+
+
+
+export const getHomePage = async () => {
+  const page = await pageDAO.getHomePage();
+
+  if (!page?.homePage) {
+    return null;
+  }
+
+  const publishedVersion = page.homePage.versions.find(
+    (v:any) => v.isPublished
+  );
+
+  if (!publishedVersion) {
+    return null;
+  }
+
+  return publishedVersion;
+};

@@ -12,7 +12,6 @@ export default async function DynamicPage({ params }: PageProps) {
   const slugArray = resolvedParams.slug ?? [];
   const fullSlug = slugArray.join("/");
 
-  console.log("FULL SLUG:", fullSlug);
 
   const page = await getPageBySlug(fullSlug);
 
