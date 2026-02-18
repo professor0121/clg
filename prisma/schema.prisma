@@ -12,6 +12,40 @@ enum PageStatus {
   ARCHIVED
 }
 
+enum PostType {
+  POST
+  PAGE
+  ATTACHMENT
+  REVISION
+  NAV_MENU_ITEM
+  CUSTOM
+}
+
+enum PostStatus {
+  DRAFT
+  PUBLISH
+  PRIVATE
+  TRASH
+}
+
+enum CommentStatus {
+  OPEN
+  CLOSED
+  APPROVED
+  SPAM
+}
+
+enum PingStatus {
+  OPEN
+  CLOSED
+}
+
+enum TaxonomyType {
+  CATEGORY
+  TAG
+  CUSTOM
+}
+
 model User {
   id           String        @id @default(uuid())
   email        String        @unique
@@ -23,6 +57,8 @@ model User {
   username     String
   sessions     Session[]
   pages        Page[]        @relation("PageAuthor")
+  posts        Post[]
+  comments     Comment[]
   pageVersions PageVersion[]
 }
 
@@ -117,4 +153,94 @@ model SiteSetting {
   homePage   Page?   @relation("HomePage", fields: [homePageId], references: [id])
 
   updatedAt DateTime @updatedAt
+}
+
+model Post {
+  id       Int    @id @default(autoincrement())
+  authorId String
+
+  title   String
+  content String
+  excerpt String?
+
+  status   PostStatus @default(DRAFT)
+  postType PostType   @default(POST)
+
+  slug          String        @unique
+  password      String?
+  commentStatus CommentStatus @default(OPEN)
+  pingStatus    PingStatus    @default(OPEN)
+
+  parentId  Int?
+  menuOrder Int  @default(0)
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  publishedAt DateTime?
+
+  author   User   @relation(fields: [authorId], references: [id])
+  parent   Post?  @relation("PostParent", fields: [parentId], references: [id])
+  children Post[] @relation("PostParent")
+
+  meta     PostMeta[]
+  comments Comment[]
+  terms    TermRelationship[]
+
+  @@index([postType])
+  @@index([status])
+}
+
+model Term {
+  id   Int    @id @default(autoincrement())
+  name String
+  slug String @unique
+
+  taxonomies TermTaxonomy[]
+}
+
+model TermTaxonomy {
+  id       Int          @id @default(autoincrement())
+  termId   Int
+  taxonomy TaxonomyType
+  parentId Int?
+  count    Int          @default(0)
+
+  term     Term           @relation(fields: [termId], references: [id])
+  parent   TermTaxonomy?  @relation("TermParent", fields: [parentId], references: [id])
+  children TermTaxonomy[] @relation("TermParent")
+
+  posts TermRelationship[]
+}
+
+model TermRelationship {
+  postId         Int
+  termTaxonomyId Int
+
+  post         Post         @relation(fields: [postId], references: [id])
+  termTaxonomy TermTaxonomy @relation(fields: [termTaxonomyId], references: [id])
+
+  @@id([postId, termTaxonomyId])
+}
+
+model PostMeta {
+  id     Int    @id @default(autoincrement())
+  postId Int
+  key    String
+  value  String
+
+  post Post @relation(fields: [postId], references: [id])
+
+  @@index([key])
+}
+
+model Comment {
+  id        Int           @id @default(autoincrement())
+  postId    Int
+  authorId  String?
+  content   String
+  status    CommentStatus @default(APPROVED)
+  createdAt DateTime      @default(now())
+
+  post   Post  @relation(fields: [postId], references: [id])
+  author User? @relation(fields: [authorId], references: [id])
 }
