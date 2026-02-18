@@ -3,7 +3,6 @@ import { getHomePage } from "@/modules/page";
 
 export default async function HomePage() {
   const homePage = await getHomePage();
-  console.log(homePage)
   if (!homePage) {
     notFound();
   }

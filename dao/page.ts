@@ -57,9 +57,11 @@ export const getPublishedPages = () => {
   });
 };
 
+/**
+ * 
+ * @returns User selected Home Page It should be updated from the Admin Panel
+ */
 export const getHomePage = async () => {
-  console.log("PRISMA KEYS:", Object.keys(prisma));
-
   return prisma.siteSetting.findFirst({
     include: {
       homePage: {
