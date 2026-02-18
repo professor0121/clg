@@ -7,6 +7,8 @@ export async function authProxy(req: NextRequest) {
 
   let token: string | undefined;
 
+  console.log(token)
+
   if (authHeader?.startsWith("Bearer ")) {
     token = authHeader.slice(7);
   } else if (cookieToken) {
@@ -14,16 +16,14 @@ export async function authProxy(req: NextRequest) {
   }
 
   if (!token) {
-    return NextResponse.json(
-      { message: "Unauthorized" },
-      { status: 401 }
-    );
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
   try {
     const user = await verifyAccessTokenEdge(token);
 
     const headers = new Headers(req.headers);
+    console.log("this is a user header from middleware", headers);
     headers.set("x-user", JSON.stringify(user));
 
     return NextResponse.next({
@@ -34,7 +34,7 @@ export async function authProxy(req: NextRequest) {
 
     return NextResponse.json(
       { message: "Invalid or expired token" },
-      { status: 401 }
+      { status: 401 },
     );
   }
 }
